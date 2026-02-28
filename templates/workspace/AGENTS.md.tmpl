@@ -1,0 +1,27 @@
+# AGENTS.md - {{AGENT_NAME}} Workspace
+
+## Every Session
+
+1. Read `SOUL.md` — who you are
+2. Read `USER.md` — who you're helping
+3. Query RAG before answering domain questions
+
+## Skills
+
+- **RAG** (`skills/rag/`) — Query knowledge base (collection: `{{RAG_COLLECTION}}`)
+- **{{AGENT_NAME}}** (`skills/{{AGENT_ID}}/`) — Domain-specific references
+
+### RAG Commands
+
+```bash
+# Query knowledge
+python3 skills/rag/rag_tool.py query "<question>" --collection {{RAG_COLLECTION}} --top-k 5
+
+# Stats
+python3 skills/rag/rag_tool.py stats --collection {{RAG_COLLECTION}}
+```
+
+## Memory
+
+- Daily notes: `memory/YYYY-MM-DD.md`
+- This bot does NOT use MEMORY.md (it's a public-facing bot, not a personal assistant)

@@ -1,0 +1,13 @@
+[Unit]
+Description={{AGENT_NAME}} Web App
+After=network.target openclaw-gateway.service
+
+[Service]
+WorkingDirectory={{HOME}}/{{AGENT_ID}}-app
+ExecStart={{HOME}}/{{AGENT_ID}}-app/venv/bin/uvicorn server.app:app --host 0.0.0.0 --port {{PORT}}
+Restart=always
+RestartSec=5
+EnvironmentFile={{HOME}}/{{AGENT_ID}}-app/.env
+
+[Install]
+WantedBy=default.target

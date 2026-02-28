@@ -1,0 +1,55 @@
+"""FastAPI backend for {{AGENT_NAME}} — proxies to OpenClaw Gateway."""
+
+import json
+import os
+
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+
+from server.chat import chat_stream
+
+load_dotenv()
+
+app = FastAPI(title="{{AGENT_NAME}}")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+
+
+class ChatRequest(BaseModel):
+    message: str
+    history: list[dict] | None = None
+
+
+@app.post("/api/chat")
+def api_chat(req: ChatRequest):
+    def generate():
+        for chunk in chat_stream(req.message, req.history):
+            yield f"data: {json.dumps(chunk)}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+# Serve frontend
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
+@app.get("/")
+def index():
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))

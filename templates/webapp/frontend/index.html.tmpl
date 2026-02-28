@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="{{HTML_LANG}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{AGENT_NAME}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>{{EMOJI}} {{HEADER_TITLE}}</h1>
+            <p>{{HEADER_SUBTITLE}}</p>
+        </header>
+
+        <div id="chat-container">
+            <div id="messages">
+                <div class="message assistant">
+                    <div class="bubble">{{WELCOME_MESSAGE}}</div>
+                </div>
+            </div>
+        </div>
+
+        <form id="input-form">
+            <div id="input-container">
+                <textarea id="user-input"
+                    placeholder="{{INPUT_PLACEHOLDER}}"
+                    rows="1"
+                    autofocus></textarea>
+                <button type="submit" id="send-btn" aria-label="Send">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="/static/app.js?v=1"></script>
+</body>
+</html>

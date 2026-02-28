@@ -1,0 +1,50 @@
+"""Chat module — proxies messages to OpenClaw Gateway's OpenAI-compatible API."""
+
+import json
+import os
+from collections.abc import Generator
+
+import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
+
+GATEWAY_URL = os.getenv("OPENCLAW_GATEWAY_URL", "http://127.0.0.1:18789")
+GATEWAY_TOKEN = os.getenv("OPENCLAW_GATEWAY_TOKEN", "")
+AGENT_ID = os.getenv("OPENCLAW_AGENT_ID", "")
+
+
+def chat_stream(user_message: str, history: list[dict] | None = None) -> Generator[str, None, None]:
+    """Stream a response from the OpenClaw Gateway."""
+    messages = []
+    if history:
+        messages.extend(history)
+    messages.append({"role": "user", "content": user_message})
+
+    with httpx.Client(timeout=120.0) as client:
+        with client.stream(
+            "POST",
+            f"{GATEWAY_URL}/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {GATEWAY_TOKEN}",
+                "Content-Type": "application/json",
+                "x-openclaw-agent-id": AGENT_ID,
+            },
+            json={
+                "model": f"openclaw:{AGENT_ID}",
+                "stream": True,
+                "messages": messages,
+            },
+        ) as response:
+            response.raise_for_status()
+            for line in response.iter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data = line[6:]
+                if data == "[DONE]":
+                    break
+                chunk = json.loads(data)
+                delta = chunk.get("choices", [{}])[0].get("delta", {})
+                content = delta.get("content", "")
+                if content:
+                    yield content
